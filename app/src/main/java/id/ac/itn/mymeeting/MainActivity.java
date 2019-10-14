@@ -1,69 +1,58 @@
 package id.ac.itn.mymeeting;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-import androidx.paging.PagedList;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
+import android.view.MenuItem;
 
-import id.ac.itn.mymeeting.adapter.MeetingPagedAdapter;
-import id.ac.itn.mymeeting.model.MeetingModel;
-import id.ac.itn.mymeeting.model.MeetingViewModel;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
+import id.ac.itn.mymeeting.fragment.MeetingFragment;
+import id.ac.itn.mymeeting.fragment.SettingFragment;
+
+public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
-    private RecyclerView recyclerView;
-    MeetingViewModel meetingViewModel;
-    SwipeRefreshLayout swipe;
-    MeetingPagedAdapter adapter;
+    MeetingFragment meetingFragment = new MeetingFragment();
+    SettingFragment settingFragment = new SettingFragment();
+    final FragmentManager fm = getSupportFragmentManager();
+    Fragment active = meetingFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        swipe = findViewById(R.id.swipeLayout);
-        swipe.setOnRefreshListener(this);
-        recyclerView = findViewById(R.id.rvMeetingList);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setHasFixedSize(true);
-        adapter = new MeetingPagedAdapter(this);
-        load_data();
-        recyclerView.setAdapter(adapter);
+        BottomNavigationView navigation = findViewById(R.id.navigation);
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        fm.beginTransaction().add(R.id.frame, settingFragment, "2").hide(settingFragment).commit();
+        fm.beginTransaction().add(R.id.frame, meetingFragment, "1").commit();
     }
 
-    void load_data() {
-        swipe.setRefreshing(true);
-        meetingViewModel = ViewModelProviders.of(this).get(MeetingViewModel.class);
-        meetingViewModel.meetingPagedList.observe(this, new Observer<PagedList<MeetingModel>>() {
-            @Override
-            public void onChanged(PagedList<MeetingModel> data) {
-                adapter.submitList(data);
-                Log.d(TAG, "onChanged: submit meetingmodels ke adapter");
-                swipe.setRefreshing(false);
-            }
-        });
-    }
+    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener =
+            new BottomNavigationView.OnNavigationItemSelectedListener() {
+                @Override
+                public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+                    switch (menuItem.getItemId()) {
+                        case R.id.bottom_nav_meeting:
+                            fm.beginTransaction().hide(active).show(meetingFragment).commit();
+                            active = meetingFragment;
+                            return true;
 
-    @Override
-    public void onRefresh() {
-        swipe.setRefreshing(true);
-        if(isNetworkAvailable()) {
-            meetingViewModel.Refresh();
-        }
-       /* if(meetingViewModel.meetingPagedList.getValue().size()<1){
-            Toast.makeText(MainActivity.this, "error", Toast.LENGTH_SHORT).show();
-        }*/
-        swipe.setRefreshing(false);
-    }
+                        case R.id.bottom_nav_settings:
+                            fm.beginTransaction().hide(active).show(settingFragment).commit();
+                            active = settingFragment;
+                            return true;
+
+                    }
+                    return false;
+                }
+            };
 
     private boolean isNetworkAvailable() {
         ConnectivityManager manager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE); //parameter is the name of service we want in either string format or referenced through the context CLASS as seen.
@@ -72,9 +61,10 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         //this also needs permission in the Android Manifest
 
         boolean isAvailable = false;
-        if (networkInfo !=null && networkInfo.isConnected()){
+        if (networkInfo != null && networkInfo.isConnected()) {
             isAvailable = true;
         }
         return isAvailable;
     }
+
 }

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/bottom_nav_meeting"
+        android:title="Agenda"
+        android:tooltipText="Agenda Rapat"
+        android:icon="@drawable/ic_featured_play_list_white_24dp"/>
+    <item android:id="@+id/bottom_nav_settings"
+        android:title="Pengguna"
+        android:tooltipText="Info Pengguna"
+        android:icon="@drawable/ic_person_black_24dp"/>
+</menu>
