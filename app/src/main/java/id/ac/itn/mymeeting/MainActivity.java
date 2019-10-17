@@ -9,6 +9,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -18,6 +19,7 @@ import id.ac.itn.mymeeting.fragment.SettingFragment;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
+    private static final String APP_STATUS = "null";
     MeetingFragment meetingFragment = new MeetingFragment();
     SettingFragment settingFragment = new SettingFragment();
     final FragmentManager fm = getSupportFragmentManager();
@@ -30,8 +32,23 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        fm.beginTransaction().add(R.id.frame, settingFragment, "2").hide(settingFragment).commit();
-        fm.beginTransaction().add(R.id.frame, meetingFragment, "1").commit();
+        if (savedInstanceState == null) {
+            fm.beginTransaction().add(R.id.frame, settingFragment, "2").hide(settingFragment).commit();
+            fm.beginTransaction().add(R.id.frame, meetingFragment, "1").commit();
+        } else {
+            if (savedInstanceState.getString(APP_STATUS).equals("meeting")) {
+                fm.beginTransaction().replace(R.id.frame, meetingFragment, "1").commit();
+                fm.beginTransaction().add(R.id.frame, settingFragment, "2").hide(settingFragment).commit();
+                active = meetingFragment;
+                Log.d(TAG, "onCreate: meeting aktif");
+            } else {
+                fm.beginTransaction().replace(R.id.frame, settingFragment, "2").commit();
+                fm.beginTransaction().add(R.id.frame, meetingFragment, "1").hide(meetingFragment).commit();
+                active = settingFragment;
+                Log.d(TAG, "onCreate: setting aktif");
+            }
+
+        }
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener =
@@ -67,4 +84,13 @@ public class MainActivity extends AppCompatActivity {
         return isAvailable;
     }
 
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (active.equals(meetingFragment)) {
+            outState.putString(APP_STATUS, "meeting");
+        } else {
+            outState.putString(APP_STATUS, "setting");
+        }
+    }
 }

@@ -28,6 +28,7 @@ import id.ac.itn.mymeeting.model.MeetingViewModel;
 
 public class MeetingFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "MeetingFragment";
+    private static final String DATA_LIST = "null";
 
     private RecyclerView recyclerView;
     MeetingViewModel meetingViewModel;
@@ -60,7 +61,10 @@ public class MeetingFragment extends Fragment implements SwipeRefreshLayout.OnRe
         recyclerView.setHasFixedSize(true);
         adapter = new MeetingPagedAdapter(getActivity());
         load_data();
-        recyclerView.setAdapter(adapter);
+        if(savedInstanceState ==null) {
+            recyclerView.setAdapter(adapter);
+        }
+        Log.d(TAG, "onViewCreated: setAdapter");
     }
 
     void load_data() {
@@ -86,4 +90,9 @@ public class MeetingFragment extends Fragment implements SwipeRefreshLayout.OnRe
         swipe.setRefreshing(false);
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(DATA_LIST,"ada");
+    }
 }
