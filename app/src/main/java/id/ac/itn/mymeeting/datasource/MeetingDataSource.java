@@ -15,12 +15,19 @@ import retrofit2.Response;
 public class MeetingDataSource extends PageKeyedDataSource<Integer, MeetingModel> {
 
     private static final String TAG = "MeetingDataSource";
-    public static final int PAGE_SIZE = 5;
+    public static final int PAGE_SIZE = 10;
     public static final int FIRST_PAGE = 1;
+    String filter = "all";
+    String idPeg = "";
+
+    public MeetingDataSource(String filter, String idPeg) {
+        this.filter = filter;
+        this.idPeg = idPeg;
+    }
 
     @Override
     public void loadInitial(@NonNull LoadInitialParams<Integer> params, @NonNull final LoadInitialCallback<Integer, MeetingModel> callback) {
-        ApiClient.getInstance().getApi().getListMeeting("all", "79", FIRST_PAGE)
+        ApiClient.getInstance().getApi().getListMeeting(this.filter, this.idPeg, FIRST_PAGE)
                 .enqueue(new Callback<ListMeetingModel>() {
                     @Override
                     public void onResponse(Call<ListMeetingModel> call, Response<ListMeetingModel> response) {
@@ -40,7 +47,7 @@ public class MeetingDataSource extends PageKeyedDataSource<Integer, MeetingModel
     @Override
     public void loadBefore(@NonNull final LoadParams<Integer> params, @NonNull final LoadCallback<Integer, MeetingModel> callback) {
         ApiClient.getInstance().getApi()
-                .getListMeeting("all", "79", params.key)
+                .getListMeeting(this.filter, this.idPeg, params.key)
                 .enqueue(new Callback<ListMeetingModel>() {
                     @Override
                     public void onResponse(Call<ListMeetingModel> call, Response<ListMeetingModel> response) {
@@ -61,7 +68,7 @@ public class MeetingDataSource extends PageKeyedDataSource<Integer, MeetingModel
     @Override
     public void loadAfter(@NonNull final LoadParams<Integer> params, @NonNull final LoadCallback<Integer, MeetingModel> callback) {
         ApiClient.getInstance().getApi()
-                .getListMeeting("all", "79", params.key)
+                .getListMeeting(this.filter, this.idPeg, params.key)
                 .enqueue(new Callback<ListMeetingModel>() {
                     @Override
                     public void onResponse(Call<ListMeetingModel> call, Response<ListMeetingModel> response) {

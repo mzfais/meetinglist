@@ -10,10 +10,17 @@ public class MeetingDataSourceFactory extends DataSource.Factory {
 
     private MutableLiveData<PageKeyedDataSource<Integer, MeetingModel>> meetingLiveDataSource = new MutableLiveData<>();
 
+    String filter = "all";
+    String idPeg = "";
+
+    public MeetingDataSourceFactory(String filter, String idPeg) {
+        this.filter = filter;
+        this.idPeg = idPeg;
+    }
 
     @Override
     public DataSource create() {
-        MeetingDataSource meetingDataSource = new MeetingDataSource();
+        MeetingDataSource meetingDataSource = new MeetingDataSource(this.filter,this.idPeg);
         meetingLiveDataSource.postValue(meetingDataSource);
         return meetingDataSource;
     }

@@ -1,6 +1,7 @@
 package id.ac.itn.mymeeting.model;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
@@ -14,9 +15,14 @@ import id.ac.itn.mymeeting.datasource.MeetingDataSourceFactory;
 public class MeetingViewModel extends ViewModel {
     public LiveData<PagedList<MeetingModel>> meetingPagedList;
     public LiveData<PageKeyedDataSource<Integer, MeetingModel>> livedataSource;
+    private static final String TAG = "MeetingViewModel";
+    private String filter, idPeg;
 
-    public MeetingViewModel() {
-        MeetingDataSourceFactory meetingDataSourceFactory = new MeetingDataSourceFactory();
+    public MeetingViewModel(String filter, String idPeg) {
+        this.filter = filter;
+        this.idPeg = idPeg;
+
+        MeetingDataSourceFactory meetingDataSourceFactory = new MeetingDataSourceFactory("all", "79");
         livedataSource = meetingDataSourceFactory.getMeetingLiveDataSource();
 
         PagedList.Config config =
@@ -25,6 +31,7 @@ public class MeetingViewModel extends ViewModel {
                         .setPageSize(MeetingDataSource.PAGE_SIZE)
                         .build();
         meetingPagedList = new LivePagedListBuilder(meetingDataSourceFactory, config).build();
+        Log.d(TAG, "MeetingViewModel: time: " + this.filter + ", idpeg: " + this.idPeg);
 
     }
 

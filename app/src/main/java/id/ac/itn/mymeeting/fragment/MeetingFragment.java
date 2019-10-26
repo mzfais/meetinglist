@@ -21,14 +21,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import id.ac.itn.mymeeting.MainActivity;
 import id.ac.itn.mymeeting.R;
 import id.ac.itn.mymeeting.adapter.MeetingPagedAdapter;
 import id.ac.itn.mymeeting.model.MeetingModel;
 import id.ac.itn.mymeeting.model.MeetingViewModel;
+import id.ac.itn.mymeeting.model.MeetingViewModelFactory;
 
 public class MeetingFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private static final String TAG = "MeetingFragment";
     private static final String DATA_LIST = "null";
+    public static final String FIRST_LOAD = "false";
 
     private RecyclerView recyclerView;
     MeetingViewModel meetingViewModel;
@@ -60,16 +63,24 @@ public class MeetingFragment extends Fragment implements SwipeRefreshLayout.OnRe
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setHasFixedSize(true);
         adapter = new MeetingPagedAdapter(getActivity());
-        load_data();
-        if(savedInstanceState ==null) {
-            recyclerView.setAdapter(adapter);
+        Boolean firstLoad;
+        try {
+            firstLoad = getArguments().getBoolean(FIRST_LOAD);
+        } catch (Exception ex) {
+            firstLoad = false;
         }
+        load_data(firstLoad);
+        recyclerView.setAdapter(adapter);
+        //}
         Log.d(TAG, "onViewCreated: setAdapter");
     }
 
-    void load_data() {
-        swipe.setRefreshing(true);
-        meetingViewModel = ViewModelProviders.of(getActivity()).get(MeetingViewModel.class);
+    private void load_data(Boolean firstLoad) {
+        if (firstLoad) {
+            swipe.setRefreshing(true);
+            Log.d(TAG, "load_data: firstload: true");
+        }
+        meetingViewModel = ViewModelProviders.of(getActivity(),new MeetingViewModelFactory("all","79")).get(MeetingViewModel.class);
         meetingViewModel.meetingPagedList.observe(getActivity(), new Observer<PagedList<MeetingModel>>() {
             @Override
             public void onChanged(PagedList<MeetingModel> data) {
@@ -93,6 +104,6 @@ public class MeetingFragment extends Fragment implements SwipeRefreshLayout.OnRe
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString(DATA_LIST,"ada");
+        outState.putString(DATA_LIST, "available");
     }
 }
